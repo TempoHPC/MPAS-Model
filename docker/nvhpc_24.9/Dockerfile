@@ -1,6 +1,6 @@
-# docker build -t mpas:8.2.0 .
-# docker run --gpus all -it --entrypoint bash mpas:8.2.0
-# docker run --gpus all -it --entrypoint bash --rm mpas:8.2.0
+# docker build -t mpas:8.2.2 .
+# docker run --gpus all -it --entrypoint bash mpas:8.2.2
+# docker run --gpus all -it --entrypoint bash --rm mpas:8.2.2
 # docker exec -i -t <container_name> bash
  
 # LNCC

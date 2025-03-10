@@ -49,8 +49,9 @@ spack external find bzip2 && \
 spack external find openmpi && \
 spack install parallelio%nvhpc@=24.9 ^parallel-netcdf ^netcdf-c@4.9.2~blosc~zstd && \
 cd MPAS-Model_v8.2.2_tempohpc && \
+git pull && \
+make CORE=atmosphere clean && \
 source docker/nvhpc_24.9/make.sh
-
 
 #RUN spack install mpas-model%nvhpc@=24.9 ^parallelio+pnetcdf
 #RUN spack install parallel-netcdf%nvhpc@=24.9 

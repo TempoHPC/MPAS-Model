@@ -12,4 +12,4 @@ spack external find cmake
 spack external find openmpi
 spack external find bzip2
 
-spack install parallelio%nvhpc@=24.9 ^netcdf-c@4.9.2~blosc~zstd
+spack install parallelio%nvhpc@=24.9 ^parallel-netcdf ^netcdf-c@4.9.2~blosc~zstd

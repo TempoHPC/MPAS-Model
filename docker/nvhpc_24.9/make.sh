@@ -37,7 +37,9 @@
 export NETCDF=$(spack location -i netcdf-fortran)
 export PNETCDF=$(spack location -i parallel-netcdf)
 
-ln -sf $(NETCDF)/lib/libnetcdf* $(PNETCDF)/lib/
+ln -sf $(spack location -i netcdf-c)/lib/libnetcdf* $(spack location -i netcdf-fortran)/lib/
+
+#make CORE=atmosphere clean
 
 #make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
 make -j 8 pgi CORE=atmosphere USE_PIO=false OPENACC=true OPENMP=true PRECISION=single 2>&1 | tee make.output

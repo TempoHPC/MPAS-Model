@@ -36,6 +36,10 @@ WORKDIR /home/monan
 
 RUN wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz
 RUN tar zxvf spack-0.23.1.tar.gz
+ 
+RUN git clone --single-branch --branch branch_v8.2.2 \
+    https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc 
+
 #RUN . spack-0.23.1/share/spack/setup-env.sh
 #RUN spack compiler find
 #RUN spack external find m4 
@@ -48,7 +52,5 @@ RUN tar zxvf spack-0.23.1.tar.gz
 #RUN spack install mpas-model%nvhpc@=24.9 ^parallelio+pnetcdf
 #RUN spack install parallel-netcdf%nvhpc@=24.9 
 
-RUN wget https://github.com/MPAS-Dev/MPAS-Model/archive/refs/tags/v8.2.2.tar.gz
-RUN tar zxvf v8.2.2.tar.gz
 
 

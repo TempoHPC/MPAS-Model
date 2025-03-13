@@ -1,0 +1,36 @@
+# docker build -t mpas:8.2.2 .
+# docker run --gpus all -it --entrypoint bash mpas:8.2.2
+# docker run --gpus all -it --entrypoint bash --rm mpas:8.2.2
+# docker exec -i -t <container_name> bash
+ 
+# LNCC
+
+Bootstrap: docker
+FROM nvcr.io/nvidia/nvhpc:24.9-devel-cuda12.6-ubuntu22.04
+
+%environment
+
+%post
+apt update -y && apt upgrade -y
+apt install -y build-essential curl git libbsd-dev python3
+apt install -y cmake
+apt install -y make
+apt install -y pkg-config 
+apt install -y vim 
+apt install -y environment-modules
+apt install -y m4
+apt install -y perl
+apt install -y bzip2 
+
+useradd -d /custom/home/monan monan
+passwd -d monan
+su monan
+cd /custom/home/monan
+
+wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz
+tar zxvf spack-0.23.1.tar.gz
+ 
+git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc 
+
+%labels
+    AUTHOR MONAN Project 

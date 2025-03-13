@@ -24,10 +24,10 @@ ENV CC=mpicc
 ENV FC=mpif90
 ENV CPP=$CXX
 
-RUN adduser monan
+RUN useradd -d /custom/home/monan monan
+RUN passwd -d monan
 USER monan
-WORKDIR /home/monan
-
+WORKDIR /custom/home/monan
 
 RUN wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz
 RUN tar zxvf spack-0.23.1.tar.gz

@@ -90,4 +90,6 @@ RUN bash -c "\
 "
 
 WORKDIR ${BENCHMARK_DIR}
+COPY run_mpas.sh ${BENCHMARK_DIR}
+
 ENTRYPOINT ["/bin/bash"]

@@ -72,12 +72,12 @@ RUN wget https://www2.mmm.ucar.edu/projects/mpas/benchmark/v7.0/MPAS-A_benchmark
 
 #Remover arquivos 
 RUN find ${BENCHMARK_DIR} -maxdepth 1 \( -name "*.TBL" -o -name "*.DBL" -o -name "RRTMG*" \) -exec rm -f {} \;
-
+WORKDIR ${BENCHMARK_DIR}
+RUN sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:00'/g" namelist.atmosphere
 
 #Linkar arquivos do modelo
 RUN bash -c "\
     cd ${BENCHMARK_DIR} && \
-    sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:00'/g" namelist.atmosphere && \
     cp ../MPAS-Model_v8.2.2_tempohpc/docker/nvhpc_24.9/run_mpas.sh . && \
     for file in CAM_ABS_DATA.DBL CAM_AEROPT_DATA.DBL GENPARM.TBL LANDUSE.TBL NoahmpTable.TBL \
                 OZONE_DAT.DBL OZONE_LAT.TBL OZONE_DAT.TBL OZONE_PLEV.TBL OZONE_TBL \

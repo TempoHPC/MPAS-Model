@@ -9,7 +9,7 @@ Precisa estar na branch: **branch_v8.2.2**
 
 ```bash
 git branch  
-git chekout branch_v8.2.2
+git checkout branch_v8.2.2
 ```
 
 Após isso, entrar no diretório onde estão os arquivos

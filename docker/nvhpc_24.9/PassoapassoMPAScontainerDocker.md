@@ -1,22 +1,22 @@
 ## Passo a passo para rodar MPAS no container Docker
 
 ```bash
-$ git clone https://github.com/TempoHPC/MPAS-Model.git
-$ cd MPAS-Model
+git clone https://github.com/TempoHPC/MPAS-Model.git
+cd MPAS-Model
 ```
 
 Precisa estar na branch: **branch_v8.2.2**
 
 ```bash
-$ git branch #verifica em qual branch está
-$ git chekout branch_v8.2.2 #muda para a branch branch_v8.2.2
+git branch  
+git chekout branch_v8.2.2
 ```
 
 Após isso, entrar no diretório onde estão os arquivos
 
 ```bash
-$ cd docker/nvhpc_24.9
-$ ls -ltr
+cd docker/nvhpc_24.9
+ls -ltr
 ```
 
 Entre os arquivos, devem conter os seguintes:

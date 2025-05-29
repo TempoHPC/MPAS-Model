@@ -1,20 +1,20 @@
 ## Passo a passo para rodar MPAS no container Docker
 
-```bash
+```
 git clone https://github.com/TempoHPC/MPAS-Model.git
 cd MPAS-Model
 ```
 
 Precisa estar na branch: **branch_v8.2.2**
 
-```bash
+```
 git branch  
 git checkout branch_v8.2.2
 ```
 
 Após isso, entrar no diretório onde estão os arquivos
 
-```bash
+```
 cd docker/nvhpc_24.9
 ls -ltr
 ```
@@ -25,155 +25,27 @@ Entre os arquivos, devem conter os seguintes:
 >
 > **run_mpas.sh**
 
-**MPAS_v8.2.2.dockerfile**
+## 🐳 Dockerfile
 
-```bash
-# docker build --no-cache -t mpas:8.2.2 -f MPAS_v8.2.2.dockerfile .
-# docker run --gpus all -it --entrypoint bash mpas:8.2.2
-# docker run --gpus all -it --entrypoint bash --rm mpas:8.2.2
-# docker exec -i -t <container_name> bash
+O arquivo Dockerfile utilizado neste ambiente está disponível aqui:
 
-FROM nvcr.io/nvidia/nvhpc:24.9-devel-cuda12.6-ubuntu22.04
+👉 [MPAS_v8.2.2.dockerfile](./MPAS_v8.2.2.dockerfile)
 
-ENV DEBIAN_FRONTEND=noninteractive
-SHELL ["/bin/bash", "-c"]
+Este arquivo contém a configuração necessária para construir a imagem do MPAS com o compilador NVIDIA HPC SDK 24.9.
 
 
-#Variáveis de diretórios principais
-
-ENV MPAS_DIR=/home/monan/MPAS-Model_v8.2.2_tempohpc \
-    BENCHMARK_DIR=/home/monan/MPAS-A_benchmark_120km_v7.0
-
-#Instalar dependências do sistema
-RUN apt update -y && apt upgrade -y && apt install -y \
-    build-essential \
-    curl \
-    git \
-    libbsd-dev \
-    python3 \
-    cmake \
-    make \
-    pkg-config \
-    vim \
-    environment-modules \
-    m4 \
-    perl \
-    bzip2 \
-    wget
-
-#Criar usuário e home
-
-RUN adduser --disabled-password --gecos "" monan
-USER monan
-WORKDIR /home/monan
-
-#Baixar Spack
-
-RUN wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz && \
-    tar zxvf spack-0.23.1.tar.gz
-
-#Clonar MPAS
-RUN git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git ${MPAS_DIR}
-
-
-#Instalar Spack e compilar MPAS
-RUN echo $USER && \
-    echo $HOME && \
-    cd && \
-    source /usr/share/modules/init/bash && \
-    module use /opt/nvidia/hpc_sdk/modulefiles && \
-    module load nvhpc-openmpi3/24.9 && \
-    source /home/monan/spack-0.23.1/share/spack/setup-env.sh && \
-    spack compiler find && \
-    spack external find m4 perl cmake openmpi bzip2 && \
-    spack install parallelio%nvhpc@=24.9 ^parallel-netcdf ^netcdf-c@4.9.2~blosc~zstd && \
-    export NETCDF=$(spack location -i netcdf-fortran) && \
-    export PNETCDF=$(spack location -i parallel-netcdf) && \
-    ln -sf $(spack location -i netcdf-c)/lib/libnetcdf* ${NETCDF}/lib/ && \
-    cd ${MPAS_DIR} && \
-    git pull && \
-    make CORE=atmosphere clean && \
-    make -j ${NUM_PROCS} pgi CORE=atmosphere USE_PIO=false OPENACC=true OPENMP=true PRECISION=single 2>&1 | tee make.output
-
-#Baixar benchmark e extrair
-RUN wget https://www2.mmm.ucar.edu/projects/mpas/benchmark/v7.0/MPAS-A_benchmark_120km_v7.0.tar.gz && \
-    tar -xvzf MPAS-A_benchmark_120km_v7.0.tar.gz
-
-
-#Remover arquivos
-RUN find ${BENCHMARK_DIR} -maxdepth 1 \( -name "*.TBL" -o -name "*.DBL" -o -name "RRTMG*" \) -exec rm -f {} \;
-WORKDIR ${BENCHMARK_DIR}
-RUN sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:00'/g" namelist.atmosphere
-
-#Linkar arquivos do modelo
-RUN bash -c "\
-    cd ${BENCHMARK_DIR} && \
-    cp ../MPAS-Model_v8.2.2_tempohpc/docker/nvhpc_24.9/run_mpas.sh . && \
-    for file in CAM_ABS_DATA.DBL CAM_AEROPT_DATA.DBL GENPARM.TBL LANDUSE.TBL NoahmpTable.TBL \
-                OZONE_DAT.DBL OZONE_LAT.TBL OZONE_DAT.TBL OZONE_PLEV.TBL OZONE_TBL \
-                RRTMG_LW_DATA RRTMG_LW_DATA.DBL RRTMG_SW_DATA RRTMG_SW_DATA.DBL \
-                SOILPARM.TBL VEGPARM.TBL atmosphere_model; do \
-        if [ -e ${MPAS_DIR}/\$file ]; then \
-            ln -sf ${MPAS_DIR}/\$file .; \
-        else \
-            echo \"não encontrado\"; \
-        fi; \
-    done \
-"
-
-WORKDIR ${BENCHMARK_DIR}
-ENTRYPOINT ["/bin/bash"]
-```
-
-**run_mpas.sh**
-
-```bash
-ntasks=${1}
-nthreads=${2}
-
-source /usr/share/modules/init/bash
-module use /opt/nvidia/hpc_sdk/modulefiles
-module load nvhpc-openmpi3/24.9
-
-workdir=/home/monan/spack-0.23.1
-spackdir=${workdir}
-source ${spackdir}/share/spack/setup-env.sh
-
-export SPACK_USER_CONFIG_PATH=${workdir}/.spack/${version}
-
-export NETCDF=$(spack location -i netcdf-fortran)
-export PNETCDF=$(spack location -i parallel-netcdf)
-
-echo "NETCDF: ${NETCDF}"
-echo "PNETCDF: ${PNETCDF}"
-
-export LD_LIBRARY_PATH=$NETCDF/lib:$PNETCDF/lib:$LD_LIBRARY_PATH
-
-echo $LD_LIBRARY_PATH
-
-export OMP_NUM_THREADS=${nthreads}
-
-mpirun -n ${ntasks} \
-        --mca mpi_cuda_support 0 \
-        ./atmosphere_model 2>&1 | tee run_mpas${ntasks}.out
-```
-
-No local do arquivo no terminal, execute o comando abaixo parar criar a imagem a partir do script **MPAS_v8.2.2.dockerfile**:
-
-```bash
-$ docker build -t mpas:8.2.2 -f MPAS_v8.2.2.dockerfile .
-```
+👉 [run_mpas.sh](./run_mpas.sh)
 
 Caso tenha feito tentativas anteriores que resultaram em erro, utilize a opção **`--no-cache`** para forçar a criação da imagem do zero, ignorando qualquer cache de etapas anteriores
 
-```bash
-$ docker build --no-cache -t mpas:8.2.2 -f MPAS_v8.2.2.dockerfile .
+```
+docker build --no-cache -t mpas:8.2.2 -f MPAS_v8.2.2.dockerfile .
 ```
 
 Para visualizar a imagem criada utilize:
 
 ```bash
-$ docker images
+docker images
 ```
 
 Aparecerá algo como:
@@ -191,20 +63,20 @@ A imagem criada pode ser identificada pelo nome e versão (REPOSITORY e TAG) que
 
 Após a criação da imagem, utilizamos o comando **`docker run`** para instanciar, ou seja, iniciar um container baseado nessa imagem:
 
-```bash
-$ docker run -it --entrypoint bash mpas:8.2.2
+```
+docker run -it --entrypoint bash mpas:8.2.2
 ```
 
 Ao executar este comando, entramos no container no diretório **/home/monan/MPAS-A_benchmark_120km_v7.0**
 Para conferir os arquivos presentes, utilize o comando :
 
-```bash
-$ ls -ltr
+```
+ls -ltr
 ```
 
 Precisa aparecer os seguintes arquivos:
 
-```bash
+```
 monan@8a748bec5eec:~/MPAS-A_benchmark_120km_v7.0$ ls -ltr
 total 372664
 -rw-r--r-- 1 monan monan   2252829 Jun  4  2013 x1.40962.graph.info
@@ -236,12 +108,12 @@ lrwxrwxrwx 1 monan monan        56 May 22 17:08 RRTMG_SW_DATA.DBL -> /home/monan
 Após isso podemos fazer a execução do mpas
 
 ```bash
-$ source ./run_mpas.sh 1 1
+source ./run_mpas.sh 1 1
 ```
 
 Saída na tela pós execução:
 
-```bash
+```
 NETCDF: /home/monan/spack-0.23.1/opt/spack/linux-ubuntu22.04-skylake/nvhpc-24.9/netcdf-fortran-4.6.1-a3jbwgai5cqqa42ejyhwwjtbk75ncyib
 PNETCDF: /home/monan/spack-0.23.1/opt/spack/linux-ubuntu22.04-skylake/nvhpc-24.9/parallel-netcdf-1.12.3-i4a5qjnargz6gdx6367jkrxqcbu2eir5
 /home/monan/spack-0.23.1/opt/spack/linux-ubuntu22.04-skylake/nvhpc-24.9/netcdf-fortran-4.6.1-a3jbwgai5cqqa42ejyhwwjtbk75ncyib/lib:/home/monan/spack-0.23.1/opt/spack/linux-ubuntu22.04-skylake/nvhpc-24.9/parallel-netcdf-1.12.3-i4a5qjnargz6gdx6367jkrxqcbu2eir5/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/comm_libs/openmpi/openmpi-3.1.5/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/compilers/extras/qd/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/comm_libs/nvshmem/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/comm_libs/nccl/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/math_libs/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/compilers/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/cuda/lib64:
@@ -258,7 +130,7 @@ Irá gerar os arquivos **log.atmosphere.0000.out** e **run_mpas.out**
 **log.atmosphere.0000.out**
 
 ```bash
-$ tail -43 log.atmosphere.0000.out
+tail -43 log.atmosphere.0000.out
 
 
     timer_name                                            total       calls        min            max            avg      pct_tot   pct_par     par_eff
@@ -307,16 +179,16 @@ $ tail -43 log.atmosphere.0000.out
 
 Para sair do container:
 
-```bash
-$ exit
+```
+exit
 ```
 
 Ao usar o comando **exit**, você sai do container, mas ele não é removido, ele apenas é interrompido e entra no estado exited (parado).
 Isso significa que ele ainda existe e pode ser acessado novamente a qualquer momento.
 Para visualizar os containers existentes (em execução ou parados), utilize o comando abaixo:
 
-```bash
-$ docker ps -a #visualizar containers existentes
+```
+docker ps -a #visualizar containers existentes
 CONTAINER ID   IMAGE           COMMAND   CREATED       STATUS                       PORTS   NAMES
 cb292ef2cdfe   mpas:8.2.2      "bash"    2 days ago    Exited (255) 8 minutes ago           vigorous_wiles
 b9f80a1308ac   mpas:8.2.2-v3   "bash"    2 days ago    Exited (127) 2 days ago              objective_jones
@@ -325,42 +197,42 @@ b9f80a1308ac   mpas:8.2.2-v3   "bash"    2 days ago    Exited (127) 2 days ago  
 
 Para executarmos o container novamente, utilizamos o comando:
 
-```bash
-$ docker start <container_name> 
-$ docker exec -i -t <container_name> bash
+```
+docker start <container_name> 
+docker exec -i -t <container_name> bash
 ```
 
 obs.: o nome dos containers são gerados aleatoriamente. Aparecem na coluna NAMES:
 
-```bash
+```
 CONTAINER ID   IMAGE           COMMAND   CREATED       STATUS                       PORTS     NAMES
 cb292ef2cdfe   mpas:8.2.2      "bash"    2 days ago    Exited (255) 8 minutes ago             vigorous_wiles
 ```
 
 Exemplo:
 
-```bash
-$ docker exec -i -t vigorous_wiles bash
+```
+docker exec -i -t vigorous_wiles bash
 ```
 
 Também é possível visualizar apenas containers que estão em execução:
 
-```bash
-$ docker ps
+```
+docker ps
 ```
 
 Outros comandos importantes:
 
 Excluir um container:
 
-```bash
-$ docker rm <containerID> 
+```
+docker rm <containerID> 
 ```
 
 Excluir uma imagem:
 
-```bash
-$ docker rmi <imageID> 
+```
+docker rmi <imageID> 
 ```
 
 Obs.: Só é possível excluir uma imagem se não existirem containers criados a partir dela. Caso existam, é necessário remover os containers antes de excluir a imagem.
@@ -371,12 +243,12 @@ Baixar arquivos da pasta : https://drive.google.com/drive/folders/1lRW5oPwfkjWr6
 
 Com o container em execução, abra outra aba do terminal (fora do container) e execute os comandos abaixo para copiar os arquivos desejados para dentro do container:
 
-```bash
-$ docker cp /caminho/do/arquivo/x1.40962.grid.nc <container ID>:/home/monan/MPAS-A_benchmark_120km_v7.0
+```
+docker cp /caminho/do/arquivo/x1.40962.grid.nc <container ID>:/home/monan/MPAS-A_benchmark_120km_v7.0
 ```
 
-```bash
-$ docker cp /caminho/do/arquivo/x1.40962.graph.info.part.2  <container ID>:/home/monan/MPAS-A_benchmark_120km_v7.0
+```
+docker cp /caminho/do/arquivo/x1.40962.graph.info.part.2  <container ID>:/home/monan/MPAS-A_benchmark_120km_v7.0
 ```
 
 Repita o procedimento acima para os demais arquivos que precisam ser copiados para o container.

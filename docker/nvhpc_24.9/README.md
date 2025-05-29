@@ -44,13 +44,13 @@ docker build --no-cache -t mpas:8.2.2 -f MPAS_v8.2.2.dockerfile .
 
 Para visualizar a imagem criada utilize:
 
-```bash
+```
 docker images
 ```
 
 Aparecerá algo como:
 
-```bash
+```
 REPOSITORY   TAG        IMAGE ID       CREATED       SIZE
 mpas         8.2.2      6c523f9c83ee   2 days ago    15.2GB
 mpas         8.2.2-v3   77ab70c7690d   2 days ago    15.2GB
@@ -77,8 +77,6 @@ ls -ltr
 Precisa aparecer os seguintes arquivos:
 
 ```
-monan@8a748bec5eec:~/MPAS-A_benchmark_120km_v7.0$ ls -ltr
-total 372664
 -rw-r--r-- 1 monan monan   2252829 Jun  4  2013 x1.40962.graph.info
 -rw-r--r-- 1 monan monan 379320020 Jun 20  2019 x1.40962.init.nc
 -rw-r--r-- 1 monan monan       927 Jun 21  2019 stream_list.atmosphere.output
@@ -107,8 +105,8 @@ lrwxrwxrwx 1 monan monan        56 May 22 17:08 RRTMG_SW_DATA.DBL -> /home/monan
 
 Após isso podemos fazer a execução do mpas
 
-```bash
-source ./run_mpas.sh 1 1
+```
+./run_mpas.sh 1 1
 ```
 
 Saída na tela pós execução:
@@ -129,9 +127,11 @@ Irá gerar os arquivos **log.atmosphere.0000.out** e **run_mpas.out**
 
 **log.atmosphere.0000.out**
 
-```bash
+```
 tail -43 log.atmosphere.0000.out
+```
 
+```
 
     timer_name                                            total       calls        min            max            avg      pct_tot   pct_par     par_eff
   1 total time                                         341.26804         1      341.26804      341.26804      341.26804   100.00       0.00       1.00
@@ -188,7 +188,10 @@ Isso significa que ele ainda existe e pode ser acessado novamente a qualquer mom
 Para visualizar os containers existentes (em execução ou parados), utilize o comando abaixo:
 
 ```
-docker ps -a #visualizar containers existentes
+docker ps -a
+
+```
+```
 CONTAINER ID   IMAGE           COMMAND   CREATED       STATUS                       PORTS   NAMES
 cb292ef2cdfe   mpas:8.2.2      "bash"    2 days ago    Exited (255) 8 minutes ago           vigorous_wiles
 b9f80a1308ac   mpas:8.2.2-v3   "bash"    2 days ago    Exited (127) 2 days ago              objective_jones

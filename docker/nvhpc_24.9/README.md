@@ -1,29 +1,16 @@
 ## Passo a passo para rodar MPAS no container Docker
 
+Sugestão: Crie um diretório para guardar o Dockerfile
+Exemplo: 
 ```
-git clone https://github.com/TempoHPC/MPAS-Model.git
-cd MPAS-Model
+mkdir ContainerMPAS
+cd ContainerMPAS
 ```
-
-Precisa estar na branch: **branch_v8.2.2**
-
+Após entrar no diretório de o comando:
 ```
-git branch  
-git checkout branch_v8.2.2
+wget https://github.com/TempoHPC/MPAS-Model/raw/refs/heads/branch_v8.2.2/docker/nvhpc_24.9/MPAS_v8.2.2.dockerfile
 ```
-
-Após isso, entrar no diretório onde estão os arquivos
-
-```
-cd docker/nvhpc_24.9
-ls -ltr
-```
-
-Entre os arquivos, devem conter os seguintes:
-
-> **MPAS_v8.2.2.dockerfile**
->
-> **run_mpas.sh**
+Este comando baixa o Dockerfile que iremos utilizar 
 
 ## 🐳 Dockerfile
 
@@ -35,6 +22,8 @@ Este arquivo contém a configuração necessária para construir a imagem do MPA
 
 
 👉 [run_mpas.sh](./run_mpas.sh)
+
+#### Execução
 
 Caso tenha feito tentativas anteriores que resultaram em erro, utilize a opção **`--no-cache`** para forçar a criação da imagem do zero, ignorando qualquer cache de etapas anteriores
 

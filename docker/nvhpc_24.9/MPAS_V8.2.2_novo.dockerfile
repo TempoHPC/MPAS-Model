@@ -1,4 +1,4 @@
-# docker build --no-cache -t mpas:8.2.2_orgV1 -f DockerfileOrganizadoV1 .
+# docker build --no-cache -t mpas:8.2.2_orgV1 -f MPAS_V8.2.2_novo.dockerfile .
 # docker run --gpus all -it --entrypoint bash mpas:8.2.2_orgV1
 
 # Imagem base e configurações iniciais

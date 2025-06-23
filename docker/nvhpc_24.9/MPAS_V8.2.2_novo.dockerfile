@@ -62,7 +62,7 @@ RUN echo $USER && \
     ln -sf $(spack location -i netcdf-c)/lib/libnetcdf* ${NETCDF}/lib/ &&\
     
     #Clonagem do MPAS 
-    git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git ${MPAS_DIR} && \
+    git clone https://github.com/TempoHPC/MPAS-Model.git ${MPAS_DIR} && \
     
     # Compilação do MPAS 
     cd ${MPAS_DIR} && \

@@ -86,14 +86,11 @@ RUN sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 8 && \
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 16
 
-
-# Script de execução
-RUN wget https://raw.githubusercontent.com/TempoHPC/MPAS-Model/branch_v8.2.2/docker/nvhpc_24.9/run_mpas.sh && \
-    chmod +x run_mpas.sh
-    
 # Link de arquivos necessários do MPAS para o diretório de benchmark 
 RUN bash -c "\
     cd ${BENCHMARK_DIR} && \
+    cp ../MPAS-Model_v8.2.2_tempohpc/run_mpas.sh . && \
+    RUN chmod +x run_mpas.sh && \
     for file in CAM_ABS_DATA.DBL CAM_AEROPT_DATA.DBL GENPARM.TBL LANDUSE.TBL NoahmpTable.TBL \
                 OZONE_DAT.DBL OZONE_LAT.TBL OZONE_DAT.TBL OZONE_PLEV.TBL OZONE_TBL \
                 RRTMG_LW_DATA RRTMG_LW_DATA.DBL RRTMG_SW_DATA RRTMG_SW_DATA.DBL \

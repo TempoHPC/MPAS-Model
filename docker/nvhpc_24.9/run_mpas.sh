@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ntasks=${1}
-nthreads=${2}
+ntasks=${1:-"1"}
+nthreads=${2:-"1"}
 
 source /usr/share/modules/init/bash
 module use /opt/nvidia/hpc_sdk/modulefiles

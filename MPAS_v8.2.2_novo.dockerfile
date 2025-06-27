@@ -90,8 +90,6 @@ RUN sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:
 RUN bash -c "\
     cd ${BENCHMARK_DIR} && \
     cp ../MPAS-Model_v8.2.2_tempohpc/run_mpas.sh . && \
-    chmod +x run_mpas.sh &&
-
     for file in CAM_ABS_DATA.DBL CAM_AEROPT_DATA.DBL GENPARM.TBL LANDUSE.TBL NoahmpTable.TBL \
                 OZONE_DAT.DBL OZONE_LAT.TBL OZONE_DAT.TBL OZONE_PLEV.TBL OZONE_TBL \
                 RRTMG_LW_DATA RRTMG_LW_DATA.DBL RRTMG_SW_DATA RRTMG_SW_DATA.DBL \

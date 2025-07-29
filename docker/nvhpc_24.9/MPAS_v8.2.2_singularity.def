@@ -3,101 +3,79 @@ From: nvcr.io/nvidia/nvhpc:24.9-devel-cuda12.6-ubuntu22.04
 
 %environment
     export DEBIAN_FRONTEND=noninteractive
-    export USER=monan
     export HOME=/home/monan
-    export MPAS_DIR=/home/monan/MPAS-Model_v8.2.2_tempohpc
-    export BENCHMARK_DIR=/home/monan/MPAS-A_benchmark_120km_v7.0
+    export USER=monan
+    export MPAS_DIR=$HOME/MPAS-Model_v8.2.2_tempohpc
+    export BENCHMARK_DIR=$HOME/MPAS-A_benchmark_120km_v7.0
 
 %post
-    echo "Atualizando sistema e instalando dependências..."
+    # Atualizações e dependências
     apt update -y && apt upgrade -y && apt install -y \
-        build-essential \
-        curl \
-        git \
-        libbsd-dev \
-        python3 \
-        cmake \
-        make \
-        pkg-config \
-        vim \
-        environment-modules \
-        m4 \
-        perl \
-        bzip2 \
-        wget \
-        metis \
-        sudo
+        build-essential curl git libbsd-dev python3 cmake make \
+        pkg-config vim environment-modules m4 perl bzip2 wget metis
 
-    echo "Criando usuário monan..."
-    useradd -m monan
+    # Criação de usuário
+    useradd -m -s /bin/bash monan
 
-    echo "Entrando como monan para configurar ambiente..."
-    su - monan << 'EOF'
-
-    cd ~
-
-    echo "Baixando Spack..."
-    wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz
+    # Instalação do Spack
+    cd /home/monan
+    wget https://github.com/spack/spack/releases/download/v0.23.1/spack-0.23.1.tar.gz && \
     tar zxvf spack-0.23.1.tar.gz
 
-    echo "Configurando módulos e Spack..."
-    [ -f /usr/share/modules/init/bash ] && source /usr/share/modules/init/bash || true
-    module use /opt/nvidia/hpc_sdk/modulefiles
-    module load nvhpc-openmpi3/24.9
+    # Evitar erro com LMOD ausente (ignorar)
+    echo '# LMOD ausente, ignorando' > /etc/profile.d/lmod.sh
 
-    source ~/spack-0.23.1/share/spack/setup-env.sh
-    spack compiler find
-    spack external find m4 perl cmake openmpi bzip2
-    spack install parallelio%nvhpc@=24.9 ^parallel-netcdf ^netcdf-c@4.9.2~blosc~zstd
+    # Preparar ambiente e instalar dependências
+    bash -c "
+        source /etc/profile || true
+        module use /opt/nvidia/hpc_sdk/modulefiles || true
+        module load nvhpc-openmpi3/24.9 || true
+        source /home/monan/spack-0.23.1/share/spack/setup-env.sh
+        spack compiler find
+        spack external find m4 perl cmake openmpi bzip2
+        spack install parallelio%nvhpc@=24.9 ^parallel-netcdf ^netcdf-c@4.9.2~blosc~zstd
 
-    export NETCDF=$(spack location -i netcdf-fortran)
-    export PNETCDF=$(spack location -i parallel-netcdf)
-    ln -sf $(spack location -i netcdf-c)/lib/libnetcdf* ${NETCDF}/lib/
+        export NETCDF=\$(spack location -i netcdf-fortran)
+        export PNETCDF=\$(spack location -i parallel-netcdf)
+        ln -sf \$(spack location -i netcdf-c)/lib/libnetcdf* \${NETCDF}/lib/
 
-    echo "Clonando MPAS Model..."
-    git clone https://github.com/TempoHPC/MPAS-Model.git ${MPAS_DIR}
+        git clone https://github.com/TempoHPC/MPAS-Model.git \${MPAS_DIR}
+        cd \${MPAS_DIR}
+        make CORE=atmosphere clean
+        make -j 2 pgi CORE=atmosphere USE_PIO=false OPENACC=true OPENMP=true PRECISION=single 2>&1 | tee make.output
+    "
 
-    cd ${MPAS_DIR}
-    make CORE=atmosphere clean
-    make -j2 pgi CORE=atmosphere USE_PIO=false OPENACC=true OPENMP=true PRECISION=single 2>&1 | tee make.output
-
-    echo "Baixando benchmark..."
-    cd ~
+    # Benchmark
+    cd /home/monan
     wget https://www2.mmm.ucar.edu/projects/mpas/benchmark/v7.0/MPAS-A_benchmark_120km_v7.0.tar.gz
     tar -xvzf MPAS-A_benchmark_120km_v7.0.tar.gz
 
-    echo "Limpando arquivos..."
-    find ${BENCHMARK_DIR} -maxdepth 1 \( -name "*.TBL" -o -name "*.DBL" -o -name "RRTMG*" \) -exec rm -f {} \;
+    # Remoção de arquivos desnecessários
+    find /home/monan/MPAS-A_benchmark_120km_v7.0 -maxdepth 1 \
+         \( -name "*.TBL" -o -name "*.DBL" -o -name "RRTMG*" \) -exec rm -f {} \;
 
-    echo "Editando namelist e rodando gpmetis..."
-    cd ${BENCHMARK_DIR}
+    # Editar namelist e gerar partições
+    cd /home/monan/MPAS-A_benchmark_120km_v7.0
     sed -i "s/config_run_duration = '3_00:00:00'/config_run_duration = '0_03:00:00'/g" namelist.atmosphere
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 2
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 4
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 8
     gpmetis -minconn -contig -niter=200 x1.40962.graph.info 16
 
-    echo "Linkando arquivos necessários..."
-    cd ${BENCHMARK_DIR}
-    cp ${MPAS_DIR}/run_mpas.sh .
+    # Copiar arquivos
+    cp /home/monan/MPAS-Model_v8.2.2_tempohpc/run_mpas.sh .
     chmod +x run_mpas.sh
+
     for file in CAM_ABS_DATA.DBL CAM_AEROPT_DATA.DBL GENPARM.TBL LANDUSE.TBL NoahmpTable.TBL \
                 OZONE_DAT.DBL OZONE_LAT.TBL OZONE_DAT.TBL OZONE_PLEV.TBL OZONE_TBL \
                 RRTMG_LW_DATA RRTMG_LW_DATA.DBL RRTMG_SW_DATA RRTMG_SW_DATA.DBL \
                 SOILPARM.TBL VEGPARM.TBL atmosphere_model; do
-        if [ -e ${MPAS_DIR}/$file ]; then
-            ln -sf ${MPAS_DIR}/$file .
+        if [ -e /home/monan/MPAS-Model_v8.2.2_tempohpc/${file} ]; then
+            ln -sf /home/monan/MPAS-Model_v8.2.2_tempohpc/${file} .
         else
-            echo "$file nao encontrado"
+            echo "Arquivo ${file} não encontrado"
         fi
     done
 
-EOF
-
 %runscript
     exec /bin/bash
-
-%labels
-    Author Isabel Adapted
-    Version 8.2.2.v1
-    Description Singularity container for MPAS Model v8.2.2 based on NVIDIA HPC SDK 24.9

@@ -5,7 +5,7 @@
 - Fazer login no SDumont
 
   ```bash
-  ssh <username>@146.134.143.248
+  ssh <username>@login.sdumont.lncc.br
   cd $SCRATCH
   ```
 
@@ -14,23 +14,11 @@
 
 ## Baixar o  modelo MPAS
 
-Baixando o código-fonte a partir do *fork* do repositório Git do MPAS, utilizando *branch* relativo a versão 8.1.0:
+Baixando o código-fonte a partir do *fork* do repositório Git do MPAS, utilizando *branch* relativo a versão 8.2.2:
 
 ```bash
-$ git clone --single-branch --branch branch_v8.1.0 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.1.0_tempohpc
-$ cd MPAS-Model_v8.1.0_tempohpc
-
-$ git log
-commit f084b36f8ac82eb1e76c426d3572339c36523c77 (grafted, HEAD -> branch_v8.1.0, tag: v8.1.0)
-Author: Michael Duda <duda@ucar.edu>
-Date:   Thu Apr 18 21:40:35 2024 +0000
-
-    Merge branch 'release-v8.1.0'
-
-    MPAS Version 8.1.0
-
-    This release of MPAS introduces several updates and new capabilities for
-    MPAS-Atmosphere, most notably:
+$ git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc
+$ cd MPAS-Model_v8.2.2_tempohpc
 
 ```
 
@@ -146,7 +134,7 @@ $ source sdumont/nvhpc_22.11/make_mpas8_nvhpc.sh
 
 ....
 
-make[2]: Leaving directory '/scratch/cenapadrjsd/rpsouto/monan/MPAS-Model_v8.1.0_tempohpc/src/core_atmosphere'
+make[2]: Leaving directory '/scratch/cenapadrjsd/rpsouto/monan/MPAS-Model_v8.2.2_tempohpc/src/core_atmosphere'
 *******************************************************************************
 MPAS was built with default single-precision reals.
 Debugging is off.
@@ -165,4 +153,6 @@ Using the SMIOL library.
 ```
 
 A mensagem final acima informa que a compilação foi bem-sucedida e alguns dos parâmetros de instalação que foram empregados. Os seguintes executáveis devem ter sido gerados: `atmosphere_model` e `build_tables`, além do arquivo  `make.output`, contendo a saída em tela da compilação.  **É fundamental que os compiladores e bibliotecas sejam compatíveis, preferencialmente compilados com o mesmo compilador** para que não haja erros na montagem do modelo. 
+
+
 

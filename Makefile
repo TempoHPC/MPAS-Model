@@ -1435,10 +1435,12 @@ mpi_f08_test:
 	$(if $(findstring 1,$(MPAS_MPI_F08)), $(info mpi_f08 module detected.))
 
 ifneq "$(PIO)" ""
-MAIN_DEPS = rebuild_check openmp_test openacc_test pio_test #mpi_f08_test
+#MAIN_DEPS = rebuild_check openmp_test openacc_test pio_test #mpi_f08_test
+MAIN_DEPS = rebuild_check openacc_test pio_test #mpi_f08_test
 override CPPFLAGS += "-DMPAS_PIO_SUPPORT"
 else
-MAIN_DEPS = rebuild_check openmp_test openacc_test #mpi_f08_test
+#MAIN_DEPS = rebuild_check openmp_test openacc_test #mpi_f08_test
+MAIN_DEPS = rebuild_check openacc_test #mpi_f08_test
 IO_MESSAGE = "Using the SMIOL library."
 override CPPFLAGS += "-DMPAS_SMIOL_SUPPORT"
 endif

@@ -38,4 +38,4 @@ export NETCDF=$(spack location -i netcdf-fortran)
 export PNETCDF=$(spack location -i parallel-netcdf)
 
 #make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
-make -j 8 pgi CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+make -f Makefile_scalasca -j 8 nvhpc CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output

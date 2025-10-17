@@ -19,7 +19,6 @@ Baixando o código-fonte a partir do *fork* do repositório Git do MPAS, utiliza
 ```bash
 $ git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc
 $ cd MPAS-Model_v8.2.2_tempohpc
-
 ```
 
 ## Compilando o modelo MPAS
@@ -27,25 +26,22 @@ $ cd MPAS-Model_v8.2.2_tempohpc
 
 ## Preparação do ambiente
 
-- Carregar os arquivos de configuração do ambiente e do spack, que estão na pasta `sdumont/nvhpc_22.11/` do repositório git.
+- Carregar os arquivos de configuração do ambiente e do spack, que estão na pasta `sdumont/openmpi_4.1.4` do repositório git.
   
-- Carregar o arquivo `env_sequana_nvhpc.sh` 
+- Carregar o arquivo `env_sequana_openmpi414.sh` 
 
   ```bash
   #!/bin/bash
   
-  module load git/2.23_sequana
+  #module load git/2.23_sequana
   module load python/3.9.1_sequana
-  module load gcc/9.3_sequana
   module load cmake/3.23.2_sequana
-  module use /scratch/cenapadrjsd/rpsouto/opt/nvidia/hpc_sdk/modulefiles
-  module load nvhpc/22.11
-  export NVLOCALRC=/scratch/cenapadrjsd/rpsouto/opt/nvidia/hpc_sdk/Linux_x86_64/localrc
+  module load openmpi/gnu/4.1.4+gcc-12.4+cuda-11.6_sequana
   ```
-
+  
   ```bash
-  $ source sdumont/nvhpc_22.11/env_sequana_nvhpc.sh
-  ```
+  $ source sdumont/openmpi_4.1.4/env_sequana_openmpi414.sh
+```
 - Carregar o arquivo `env_spack.sh` 
 
   ```bash
@@ -57,28 +53,28 @@ $ cd MPAS-Model_v8.2.2_tempohpc
   
   export SPACK_USER_CONFIG_PATH=${workdir}/spack/sequana/.spack/${version}
   
-  spack env activate -p monan
+  spack env activate -p mpas_gcc12
   ```
 
   ```bash
-  $ source sdumont/nvhpc_22.11/env_spack.sh
+  $ source sdumont/openmpi_4.1.4/env_spack.sh
   ```
 
 - Que já carrega o *environment* monan:
 
   ```bash
-  [monan]$
+  [mpas_gcc12]$
   ```
 
 - Listar os pacotes instalados no *environment* monan do spack:
 
   ```bash
-  [monan]$ spack find
+  [mpas_gcc12]$ spack find
   ```
 
   
 
-- Executar o script para instalação do MPAS `sdumont/nvhpc_22.11/make_mpas8_nvhpc.sh`
+- Executar o script para instalação do MPAS `sdumont/openmpi_4.1.4/make_mpas8_gnu.sh`
 
 - Que possui conteúdo a seguir, definindo as variáveis de ambiente `NETCDF` e `PNETCF`, e executando comando make com alguns parâmetros a serem seguidos na durante a compilação do código-fonte. O cabeçalho do script explica o significado de cada parâmetro. 
 
@@ -123,14 +119,14 @@ export NETCDF=$(spack location -i netcdf-fortran)
 export PNETCDF=$(spack location -i parallel-netcdf)
 
 #make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO2=true PRECISION=single 2>&1 | tee make.output
-make -j 8 pgi CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+make -j 8 gfortran CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
 ```
 
 - Executa a instalação:
 
 ```bash
 $ make CORE=atmosphere clean
-$ source sdumont/nvhpc_22.11/make_mpas8_nvhpc.sh
+$ source sdumont/openmpi_4.1.4/make_mpas8_gnu.sh
 
 ....
 

@@ -6,4 +6,4 @@ spackdir=${workdir}/spack/sequana/${version}
 
 export SPACK_USER_CONFIG_PATH=${workdir}/spack/sequana/.spack/${version}
 
-spack env activate -p monan
+spack env activate -p mpas_gcc12 

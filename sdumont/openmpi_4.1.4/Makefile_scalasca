@@ -9,9 +9,9 @@ dummy:
 
 gnu:   # BUILDTARGET GNU Fortran, C, and C++ compilers
 	( $(MAKE) all \
-	"FC_PARALLEL = mpif90" \
-	"CC_PARALLEL = mpicc" \
-	"CXX_PARALLEL = mpicxx" \
+	"FC_PARALLEL = scorep mpif90" \
+	"CC_PARALLEL = scorep mpicc" \
+	"CXX_PARALLEL = scorep mpicxx" \
 	"FC_SERIAL = gfortran" \
 	"CC_SERIAL = gcc" \
 	"CXX_SERIAL = g++" \
@@ -380,12 +380,12 @@ intel-mpi:   # BUILDTARGET Intel compiler suite with Intel MPI library
 
 gfortran:   # BUILDTARGET GNU Fortran, C, and C++ compilers
 	( $(MAKE) all \
-	"FC_PARALLEL = mpif90" \
-	"CC_PARALLEL = mpicc" \
-	"CXX_PARALLEL = mpicxx" \
-	"FC_SERIAL = gfortran" \
-	"CC_SERIAL = gcc" \
-	"CXX_SERIAL = g++" \
+	"FC_PARALLEL = scorep mpif90" \
+	"CC_PARALLEL = scorep mpicc" \
+	"CXX_PARALLEL = scorep mpicxx" \
+	"FC_SERIAL = scorep gfortran" \
+	"CC_SERIAL = scorep gcc" \
+	"CXX_SERIAL = scorep g++" \
 	"FFLAGS_PROMOTION = -fdefault-real-8 -fdefault-double-8" \
 	"FFLAGS_OPT = -O3 -ffree-line-length-none -fconvert=big-endian -ffree-form" \
 	"CFLAGS_OPT = -O3" \

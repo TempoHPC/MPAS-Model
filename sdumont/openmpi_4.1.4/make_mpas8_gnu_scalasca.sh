@@ -40,3 +40,4 @@ export PNETCDF=$(spack location -i parallel-netcdf)
 #make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
 #make -j 8 gfortran CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
 make -j 8 gfortran-scorep CORE=atmosphere USE_PIO=false OPENMP=false PRECISION=single 2>&1 | tee make.output
+mv atmosphere_model atmosphere_model_scalasca

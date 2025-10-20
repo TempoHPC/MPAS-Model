@@ -17,8 +17,8 @@
 Baixando o código-fonte a partir do *fork* do repositório Git do MPAS, utilizando *branch* relativo a versão 8.2.2:
 
 ```bash
-$ git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc
-$ cd MPAS-Model_v8.2.2_tempohpc
+$ git clone --single-branch --branch branch_v8.2.2 https://github.com/TempoHPC/MPAS-Model.git MPAS-Model_v8.2.2_tempohpc_scalasca
+$ cd MPAS-Model_v8.2.2_tempohpc_scalasca
 ```
 
 ## Compilando o modelo MPAS
@@ -54,7 +54,7 @@ $ cd MPAS-Model_v8.2.2_tempohpc
   export SPACK_USER_CONFIG_PATH=${workdir}/spack/sequana/.spack/${version}
   
   spack env activate -p mpas_gcc12
-  ```
+```
 
   ```bash
   $ source sdumont/openmpi_4.1.4/env_spack.sh
@@ -70,11 +70,44 @@ $ cd MPAS-Model_v8.2.2_tempohpc
 
   ```bash
   [mpas_gcc12]$ spack find
+  ==> In environment mpas_gcc12
+  ==> Root specs
+  -- no arch / gcc@12.4.0 -----------------------------------------
+  hpctoolkit@2021.10.15%gcc@12.4.0  mpas-model%gcc@12.4.0  scalasca%gcc@12.4.0
+  
+  ==> 45 installed packages
+  -- linux-rhel8-skylake_avx512 / gcc@12.4.0 ----------------------
+  autoconf@2.69      diffutils@3.6          libiberty@2.37         netcdf-fortran@4.5.4    parallelio@2_5_4
+  automake@1.16.1    dyninst@12.1.0         libmonitor@2021.11.08  numactl@2.0.14          perl@5.26.3
+  binutils@2.30.119  elfutils@0.186         libtool@2.4.6          opari2@2.0.6            pkgconf@1.4.2
+  boost@1.79.0       hdf5@1.12.2            libunwind@1.6.2        openjdk@11.0.15_10      python@3.9.1
+  bzip2@1.0.8        hpctoolkit@2021.10.15  m4@1.4.18              openmpi@4.1.4           scalasca@2.6
+  cmake@3.23.2       hpcviewer@2022.03      mbedtls@3.1.0          openssl@1.1.1o          scorep@7.0
+  cubelib@4.6        intel-tbb@2020.3       memkind@1.13.0         otf2@2.3                xerces-c@3.2.3
+  cubew@4.6          intel-xed@2022.04.17   mpas-model@7.1         papi@6.0.0.1            xz@5.2.5
+  curl@7.83.0        libdwarf@20180129      netcdf-c@4.8.1         parallel-netcdf@1.12.2  zlib@1.2.12
+  
+  ```
+
+- Carregar o pacote `scalasca`
+
+  ```bash
+  [mpas_gcc12]$ spack load scalasca
+  ```
+
+- Verifica se foi em carregado o pacote
+
+  ```bash
+  [mpas_gcc12]$ spack load --list
+  ==> 10 loaded packages
+  -- linux-rhel8-skylake_avx512 / gcc@12.4.0 ----------------------
+  cubelib@4.6  opari2@2.0.6   otf2@2.3      pkgconf@1.4.2  scorep@7.0
+  cubew@4.6    openmpi@4.1.4  papi@6.0.0.1  scalasca@2.6   zlib@1.2.12
   ```
 
   
 
-- Executar o script para instalação do MPAS `sdumont/openmpi_4.1.4/make_mpas8_gnu.sh`
+- Executar o script para instalação do MPAS `sdumont/openmpi_4.1.4/make_mpas8_gnu_scalasca.sh`
 
 - Que possui conteúdo a seguir, definindo as variáveis de ambiente `NETCDF` e `PNETCF`, e executando comando make com alguns parâmetros a serem seguidos na durante a compilação do código-fonte. O cabeçalho do script explica o significado de cada parâmetro. 
 
@@ -114,23 +147,25 @@ $ cd MPAS-Model_v8.2.2_tempohpc
 #    PRECISION=single - builds with default single-precision real kind. Default is to use double-precision.
 #    SHAREDLIB=true - generate position-independent code suitable for use in a shared library. Default is false.
 
-#export PIO=$(spack location -i parallelio)
+#export PIO=$(spack location -i parallelio
 export NETCDF=$(spack location -i netcdf-fortran)
 export PNETCDF=$(spack location -i parallel-netcdf)
 
-#make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO2=true PRECISION=single 2>&1 | tee make.output
-make -j 8 gfortran CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+#make -j 8 [gfortran|ifort|pgi|xlf] CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+#make -j 8 gfortran CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+make -j 8 gfortran-scorep CORE=atmosphere USE_PIO=false OPENMP=true PRECISION=single 2>&1 | tee make.output
+mv atmosphere_model atmosphere_model_scalasca
 ```
 
 - Executa a instalação:
 
 ```bash
 $ make CORE=atmosphere clean
-$ source sdumont/openmpi_4.1.4/make_mpas8_gnu.sh
+$ source sdumont/openmpi_4.1.4/make_mpas8_gnu_scalasca.sh
 
 ....
 
-make[2]: Leaving directory '/scratch/cenapadrjsd/rpsouto/monan/MPAS-Model_v8.2.2_tempohpc/src/core_atmosphere'
+make[2]: Leaving directory '/scratch/cenapadrjsd/rpsouto/monan/MPAS-Model_v8.2.2_tempohpc_scalasca/src/core_atmosphere'
 *******************************************************************************
 MPAS was built with default single-precision reals.
 Debugging is off.
@@ -148,7 +183,7 @@ Using the SMIOL library.
 *******************************************************************************
 ```
 
-A mensagem final acima informa que a compilação foi bem-sucedida e alguns dos parâmetros de instalação que foram empregados. Os seguintes executáveis devem ter sido gerados: `atmosphere_model` e `build_tables`, além do arquivo  `make.output`, contendo a saída em tela da compilação.  **É fundamental que os compiladores e bibliotecas sejam compatíveis, preferencialmente compilados com o mesmo compilador** para que não haja erros na montagem do modelo. 
+A mensagem final acima informa que a compilação foi bem-sucedida e alguns dos parâmetros de instalação que foram empregados. Os seguintes executáveis devem ter sido gerados: `atmosphere_model_scalaca` e `build_tables`, além do arquivo  `make.output`, contendo a saída em tela da compilação.  **É fundamental que os compiladores e bibliotecas sejam compatíveis, preferencialmente compilados com o mesmo compilador** para que não haja erros na montagem do modelo. 
 
 
 

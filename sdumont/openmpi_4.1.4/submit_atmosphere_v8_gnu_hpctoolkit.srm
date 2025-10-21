@@ -1,12 +1,11 @@
 #!/bin/bash
 #SBATCH --nodes=1                #Número de Nós
 #SBATCH --ntasks=8               #Numero total de tarefas MPI
-#SBATCH --ntasks-per-node=8      #Número de tarefas por Nó
 #SBATCH --cpus-per-task=1
 #SBATCH -p sequana_gpu_dev       #Fila (partition) a ser utilizada
 #SBATCH -J init_atmosphere       #Nome job
 #SBATCH --time=00:20:00          #Obrigatório
-#SBATCH --gpus=1
+#SBATCH --gpus=1          #Obrigatório
 
 #export LD_LIBRARY_PATH=/scratch/cenapadrjsd/monan/usr/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/scratch/cenapadrjsd/rpsouto/usr/lib64:$LD_LIBRARY_PATH
@@ -54,7 +53,7 @@ hpcprof \
  -I /scratch/cenapadrjsd/rpsouto/projetos/tempohpc/github/MPAS-Model_v8.2.2_openmpi-4.1.4_gnu/+ \
  -S ${executable}.hpcstruct hpctoolkit-atmosphere_model-measurements-${SLURM_JOBID}
 
-mv slurm-${SLURM_JOBID}.out ${resultdir}/
+cp slurm-${SLURM_JOBID}.out ${resultdir}/
 mv hpctoolkit-atmosphere_model-database-${SLURM_JOBID} ${resultdir}/
 mv hpctoolkit-atmosphere_model-measurements-${SLURM_JOBID} ${resultdir}/
 mv ${executable}.hpcstruct ${resultdir}/

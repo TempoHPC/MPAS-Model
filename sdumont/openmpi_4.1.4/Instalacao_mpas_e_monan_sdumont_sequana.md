@@ -41,7 +41,7 @@ $ cd MPAS-Model_v8.2.2_tempohpc
   
   ```bash
   $ source sdumont/openmpi_4.1.4/env_sequana_openmpi414.sh
-```
+  ```
 - Carregar o arquivo `env_spack.sh` 
 
   ```bash
@@ -54,11 +54,11 @@ $ cd MPAS-Model_v8.2.2_tempohpc
   export SPACK_USER_CONFIG_PATH=${workdir}/spack/sequana/.spack/${version}
   
   spack env activate -p mpas_gcc12
-  ```
+```
 
   ```bash
   $ source sdumont/openmpi_4.1.4/env_spack.sh
-  ```
+```
 
 - Que já carrega o *environment* monan:
 

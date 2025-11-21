@@ -1,4 +1,4 @@
-# Instalação do MPAS e do MONAN no SDumont (sequana)
+# Execução do MPAS e do MONAN no SDumont (sequana)
 
 
 ## Acesso ao SDumont
@@ -144,4 +144,5 @@ Essas pastas contém todos os arquivos necessários para realizar a execução d
   ```
 
   
+
 
